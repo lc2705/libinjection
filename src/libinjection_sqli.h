@@ -287,6 +287,8 @@ int libinjection_sqli_blacklist(struct libinjection_sqli_state* sql_state);
  */
 int libinjection_sqli_not_whitelist(struct libinjection_sqli_state * sql_state);
 
+int libinjection_keywords_init();
+void libinjection_keywords_destroy();
 #ifdef __cplusplus
 }
 #endif

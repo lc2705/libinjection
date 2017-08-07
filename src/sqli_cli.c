@@ -93,6 +93,7 @@ int main(int argc, const char* argv[])
 
     sfilter sf;
 
+ 	libinjection_keywords_init();
     if (argc < 2) {
         usage();
         return 1;

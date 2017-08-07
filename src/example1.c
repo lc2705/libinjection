@@ -8,7 +8,9 @@ int main(int argc, const char* argv[])
     const char* input;
     size_t slen;
     int issqli;
+	int isxss;
 
+	libinjection_keywords_init();
     if (argc < 2) {
         fprintf(stderr, "Usage: %s inputstring\n", argv[0]);
         return -1;
@@ -25,6 +27,11 @@ int main(int argc, const char* argv[])
         printf("not sqli\n");
     }
 
+	isxss = libinjection_xss(input, slen);
+	if(isxss)
+		printf("xss\n");
+	else
+		printf("not xss\n");	
 
     return issqli;
 }

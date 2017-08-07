@@ -24,6 +24,7 @@ int main(int argc, const char* argv[])
     int offset = 1;
 
     sfilter sf;
+	libinjection_keywords_init();
     if (argc < 2) {
         fprintf(stderr, "need more args\n");
         return 1;

@@ -44,6 +44,7 @@ int testIsSQL(void)
     }
 
     t1 = clock();
+    printf("clock %d\n", (int)(t1-t0));
     total = (double) (t1 - t0) / (double) CLOCKS_PER_SEC;
     tps = (int)((double) imax / total);
     return tps;
@@ -52,8 +53,12 @@ int testIsSQL(void)
 int main()
 {
     const int mintps = 450000;
-    int tps = testIsSQL();
+	int tps;
 
+	libinjection_keywords_init();
+    tps = testIsSQL();
+	/*libinjection_keywords_destroy();
+*/
     printf("\nTPS : %d\n\n", tps);
 
     if (tps < mintps) {

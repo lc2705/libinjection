@@ -262,6 +262,8 @@ int main(int argc, char** argv)
     int quiet = 0;
 
     const char* fname;
+	libinjection_keywords_init();
+
     while (argc > offset) {
         if (strcmp(argv[offset], "-q") == 0 || strcmp(argv[offset], "--quiet") == 0) {
             quiet = 1;
@@ -309,5 +311,6 @@ int main(int argc, char** argv)
             }
         }
     }
+	libinjection_keywords_destroy();
     return count > 0 && count_fail > 0;
 }

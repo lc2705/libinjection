@@ -237,7 +237,8 @@ int main(int argc, const char *argv[])
     int i, j;
     int offset = 1;
 
-    while (offset < argc) {
+   	libinjection_keywords_init();
+	 while (offset < argc) {
         if (strcmp(argv[offset], "-?") == 0 ||
             strcmp(argv[offset], "-h") == 0 ||
 	    strcmp(argv[offset], "-help") == 0 ||
@@ -302,7 +303,7 @@ int main(int argc, const char *argv[])
     if (flag_invert) {
         count = g_test_fail;
     }
-
+	libinjection_keywords_destroy();
     if (count > max) {
         printf("\nThreshold is %d, got %d, failing.\n", max, count);
         return 1;

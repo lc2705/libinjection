@@ -19,15 +19,19 @@ STATICLIB=lib${LIBNAME}.${STATICLIB_SUFFIX}
 SHAREDLIB_SUFFIX=so
 SHAREDLIB=lib${LIBNAME}.${SHAREDLIB_SUFFIX}
 
-HEADERS=libinjection.h libinjection_sqli.h libinjection_sqli_data.h libinjection_html5.h libinjection_xss.h
+HEADERS=libinjection.h libinjection_sqli.h libinjection_sqli_data.h libinjection_html5.h libinjection_xss.h cuckoo_hash.h
 
 SOURCES=libinjection_sqli.c \
 	libinjection_html5.c \
-	libinjection_xss.c
+	libinjection_xss.c \
+	cuckoo_hash.c \
+	lookup3.c	
 
 OBJECTS=libinjection_sqli.o \
 	libinjection_html5.o \
-	libinjection_xss.o
+	libinjection_xss.o \
+	cuckoo_hash.o \
+	lookup3.o	
 
 SAMPLES=html5 sqli fptool
 TESTDRIVERS=reader testdriver testspeedxss testspeedsqli
@@ -50,8 +54,8 @@ fingerprints:
 sqlparse_data.json: sqlparse_map.py fingerprints
 	./sqlparse_map.py > sqlparse_data.json
 
-libinjection_sqli_data.h: sqlparse2c.py sqlparse_data.json
-	./sqlparse2c.py < sqlparse_data.json > libinjection_sqli_data.h
+#libinjection_sqli_data.h: sqlparse2c.py sqlparse_data.json
+#	./sqlparse2c.py < sqlparse_data.json > libinjection_sqli_data.h
 
 libinjection_sqli.o: libinjection.h libinjection_sqli.c libinjection_sqli.h libinjection_sqli_data.h
 	${CC} ${CFLAGS} -c -o libinjection_sqli.o libinjection_sqli.c
@@ -61,6 +65,12 @@ libinjection_xss.o: libinjection.h libinjection_xss.c libinjection_xss.h libinje
 
 libinjection_html5.o: libinjection.h libinjection_html5.c libinjection_html5.h
 	${CC} ${CFLAGS} -c -o libinjection_html5.o libinjection_html5.c
+
+cuckoo_hash.o: cuckoo_hash.c cuckoo_hash.h xprobes.h
+	${CC} -g -fPIC -c -o cuckoo_hash.o cuckoo_hash.c
+
+lookup3.o: lookup3.o
+	${CC} -g -fPIC -c -o lookup3.o lookup3.c
 
 ${SHAREDLIB}: ${OBJECTS}
 	$(CC) $+ -shared -lc -o $@
