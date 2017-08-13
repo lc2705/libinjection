@@ -24,7 +24,7 @@ int testIsSQL(void)
         "(1001-'1') union select 1,2,3,4 from credit_cards",
         NULL
     };
-    const int imax = 1000000;
+    const int imax = 10000000;
     int i, j;
     size_t slen;
     sfilter sf;
@@ -53,9 +53,9 @@ int testIsSQL(void)
 int main()
 {
     const int mintps = 450000;
-	int tps;
+    int tps;
 
-	libinjection_keywords_init();
+    libinjection_keywords_init();
     tps = testIsSQL();
 	/*libinjection_keywords_destroy();
 */

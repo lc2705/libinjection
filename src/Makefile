@@ -25,13 +25,15 @@ SOURCES=libinjection_sqli.c \
 	libinjection_html5.c \
 	libinjection_xss.c \
 	cuckoo_hash.c \
-	lookup3.c	
+	lookup3.c \
+	trie.c	
 
 OBJECTS=libinjection_sqli.o \
 	libinjection_html5.o \
 	libinjection_xss.o \
 	cuckoo_hash.o \
-	lookup3.o	
+	lookup3.o \
+	trie.o	
 
 SAMPLES=html5 sqli fptool
 TESTDRIVERS=reader testdriver testspeedxss testspeedsqli

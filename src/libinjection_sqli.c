@@ -19,6 +19,7 @@
 #include "libinjection_sqli_data.h"
 
 #include "cuckoo_hash.h"
+#include "trie.h"
 
 #define LIBINJECTION_VERSION "3.9.2"
 
@@ -47,7 +48,10 @@
 #endif
 
 struct cuckoo_hash g_fingerprints_hash;
+struct trie* g_keywords_trie;
+/*
 struct cuckoo_hash g_keywords_hash;
+*/
 const keyword_t* g_keywords[10000];
 unsigned int g_keywords_sz = 0;
 char key_buf[32];
@@ -302,6 +306,16 @@ static char hash_keyword_type(const char* key, size_t len)
     return ((keyword_t*)(item->value))->type;
 }
 #endif
+
+static char trie_keyword_type(const char *key, int len)
+{
+    keyword_t *item = (keyword_t*)trie_lookup(g_keywords_trie, key, len);
+    if(item == NULL)
+        return CHAR_NULL;
+    return item->type;
+}
+
+
 /* st_token methods
  *
  * The following functions manipulates the stoken_t type
@@ -1991,13 +2005,14 @@ int libinjection_sqli_check_fingerprint(struct libinjection_sqli_state* sql_stat
 }
 
 char libinjection_sqli_lookup_word(struct libinjection_sqli_state *sql_state, int lookup_type,
-                                   const char* str, size_t len)
+                                   const char* str, size_t len __attribute__ ((unused)))
 {
     if (lookup_type == LOOKUP_FINGERPRINT) {
         return libinjection_sqli_check_fingerprint(sql_state) ? 'X' : '\0';
     } else {
-        return bsearch_keyword_type(str, len, g_keywords, g_keywords_sz);
-/*        return hash_keyword_type(str, len);
+        return trie_keyword_type(str, len);
+/*        return bsearch_keyword_type(str, len, g_keywords, g_keywords_sz);
+        return hash_keyword_type(str, len);
 */
     }
 }
@@ -2358,7 +2373,8 @@ int libinjection_keywords_init()
     unsigned int i;
     unsigned int cnt = 0;
     struct cuckoo_hash_item *item;
-    if(!cuckoo_hash_init(&g_fingerprints_hash, 1) || !(cuckoo_hash_init(&g_keywords_hash, 1)))
+    void *trie_item;
+    if(!cuckoo_hash_init(&g_fingerprints_hash, 1) || !(g_keywords_trie = trie_create()))
         return 0;
 
     for(i = 0; i < sql_keywords_sz; i++)
@@ -2369,13 +2385,19 @@ int libinjection_keywords_init()
                 fprintf(stderr, "keywords %s insert error\n", sql_keywords[i].word);
             }
         } else {
+            trie_item = trie_insert(g_keywords_trie, sql_keywords[i].word, strlen(sql_keywords[i].word), (void*)&sql_keywords[i]);
+            if(trie_item == NULL) {
+                fprintf(stderr, "keywrds %s insert error\n", sql_keywords[i].word);
+            }
 #if 0
             item = cuckoo_hash_insert(&g_keywords_hash, (void*)sql_keywords[i].word, strlen(sql_keywords[i].word), (void*)&sql_keywords[i]);
             if(item == CUCKOO_HASH_FAILED) {
                 fprintf(stderr, "keywords %s insert error\n", sql_keywords[i].word);
             }
 #endif
+#if 0
             g_keywords[cnt] =  &sql_keywords[i];
+#endif
             cnt++;
         }
     }
@@ -2387,5 +2409,8 @@ int libinjection_keywords_init()
 void libinjection_keywords_destroy()
 {
     cuckoo_hash_destroy(&g_fingerprints_hash);
-    cuckoo_hash_destroy(&g_keywords_hash);
+    trie_destroy(g_keywords_trie);
+/*
+ * cuckoo_hash_destroy(&g_keywords_hash);
+*/
 }
