@@ -71,7 +71,7 @@ libinjection_html5.o: libinjection.h libinjection_html5.c libinjection_html5.h
 cuckoo_hash.o: cuckoo_hash.c cuckoo_hash.h xprobes.h
 	${CC} -g -fPIC -c -o cuckoo_hash.o cuckoo_hash.c
 
-lookup3.o: lookup3.o
+lookup3.o: lookup3.c
 	${CC} -g -fPIC -c -o lookup3.o lookup3.c
 
 ${SHAREDLIB}: ${OBJECTS}
