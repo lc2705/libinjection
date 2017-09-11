@@ -148,6 +148,8 @@ int main(int argc, const char* argv[])
      * can see if we run past the buffer.
      */
 
+    libinjection_xss_init();
+
     slen = strlen(argv[offset]);
     copy = (char* ) malloc(slen);
     memcpy(copy, argv[offset], slen);
@@ -164,5 +166,6 @@ int main(int argc, const char* argv[])
       printf("is injection!\n");
     }
     free(copy);
+    libinjection_xss_destroy();
     return 0;
 }

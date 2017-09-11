@@ -17,8 +17,6 @@ void* trie_insert(struct trie* data, const char* key, int len, void* val);
 
 void* trie_lookup(struct trie* data, const char* key, int len);
 
-void* trie_lookup_prefix(struct trie* data, char* prefix, int len, void* ambiguous);
-
 void trie_remove(struct trie* data, char* key);
 
 void trie_destroy(struct trie* data);

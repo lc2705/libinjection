@@ -8,6 +8,7 @@
 #include <stdio.h>
 
 #include "libinjection.h"
+#include "libinjection_xss.h"
 int testIsSQL(void);
 
 int testIsSQL(void)
@@ -68,7 +69,9 @@ int testIsSQL(void)
 int main()
 {
     const int mintps = 500000;
-    int tps = testIsSQL();
+    int tps;
+    libinjection_xss_init();
+    tps = testIsSQL();
 
     printf("\nTPS : %d\n\n", tps);
 

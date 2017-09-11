@@ -95,43 +95,6 @@ void* trie_lookup(struct trie* data, const char* key, int len)
 
     return current_node->val;
 }
-
-void* trie_lookup_prefix(struct trie* data, char* prefix, int len, void* ambiguous)
-{
-    struct trie* current_node = trie_traverse(data, prefix, len);
-
-    if (!current_node)
-    {
-        return NULL;
-    }
-
-    if(NULL!=current_node->val)
-    {
-        return current_node->val;
-    }
-
-    while(NULL==current_node->val)
-    {
-        switch(current_node->type)
-        {
-            case trienode_leaf:
-                return current_node->val;
-            case trienode_twig:
-                current_node = *current_node->children;
-		continue;
-            case trienode_branch:
-		return ambiguous;
-        }
-    }
-
-    if(trienode_twig==current_node->type)
-    {
-        return ambiguous;
-    }
-
-    return current_node->val;
-}
-
 void trie_remove(struct trie* data, char* key)
 {
     struct trie* current_node = data;

@@ -237,7 +237,6 @@ int main(int argc, const char *argv[])
     int i, j;
     int offset = 1;
 
-   	libinjection_keywords_init();
 	 while (offset < argc) {
         if (strcmp(argv[offset], "-?") == 0 ||
             strcmp(argv[offset], "-h") == 0 ||
@@ -274,6 +273,12 @@ int main(int argc, const char *argv[])
         }
     }
 
+    if(mode == MODE_SQLI) {
+        libinjection_keywords_init();
+    } else if (mode == MODE_XSS) {
+        libinjection_xss_init();
+    }
+
     if (offset == argc) {
         test_positive(stdin, "stdin", mode, flag_invert, flag_true, flag_quiet);
     } else {
@@ -303,7 +308,12 @@ int main(int argc, const char *argv[])
     if (flag_invert) {
         count = g_test_fail;
     }
-	libinjection_keywords_destroy();
+
+    if(mode == MODE_SQLI)
+	    libinjection_keywords_destroy();
+    else
+        libinjection_xss_destroy();
+ 
     if (count > max) {
         printf("\nThreshold is %d, got %d, failing.\n", max, count);
         return 1;

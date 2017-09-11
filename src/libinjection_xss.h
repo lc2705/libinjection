@@ -15,6 +15,10 @@ extern "C" {
 
   int libinjection_is_xss(const char* s, size_t len, int flags);
 
+  int libinjection_xss_init();
+
+  void libinjection_xss_destroy();
+
 #ifdef __cplusplus
 }
 #endif

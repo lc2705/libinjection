@@ -2,6 +2,7 @@
 #include "libinjection.h"
 #include "libinjection_xss.h"
 #include "libinjection_html5.h"
+#include "trie.h"
 
 #include <assert.h>
 #include <stdio.h>
@@ -27,7 +28,10 @@ typedef struct stringtype {
     const char* name;
     attribute_t atype;
 } stringtype_t;
-
+#if 0
+static struct trie *g_blacktag_trie = NULL;
+#endif
+static struct trie *g_blackattr_trie = NULL;
 
 static const int gsHexDecodeMap[256] = {
     256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256, 256,
@@ -210,6 +214,26 @@ static const char* BLACKTAG[] = {
     , NULL
 };
 
+attribute_t lookup_blackattr(const char *s, size_t len)
+{
+    stringtype_t *item = NULL;
+    item = trie_lookup(g_blackattr_trie, s, len);
+    if(item == NULL)
+        return TYPE_NONE;
+    return item->atype;
+}
+
+#if 0
+int lookup_blacktag(const char *s, size_t len)
+{
+    const char **item = NULL;
+    item = trie_lookup(g_blacktag_trie, s, len);
+    if(item == NULL)
+        return 0;
+    else
+        return 1;
+}
+#endif
 
 static int cstrcasecmp_with_null(const char *a, const char *b, size_t n)
 {
@@ -303,16 +327,16 @@ static int is_black_tag(const char* s, size_t len)
     if (len < 3) {
         return 0;
     }
-
+#if 1
     black = BLACKTAG;
     while (*black != NULL) {
         if (cstrcasecmp_with_null(*black, s, len) == 0) {
-            /* printf("Got black tag %s\n", *black); */
-            return 1;
+            /* printf("Got black tag %s with %s\n", *black, s); */
+            return 1; 
         }
         black += 1;
     }
-
+#endif
     /* anything SVG related */
     if ((s[0] == 's' || s[0] == 'S') &&
         (s[1] == 'v' || s[1] == 'V') &&
@@ -334,8 +358,8 @@ static int is_black_tag(const char* s, size_t len)
 
 static attribute_t is_black_attr(const char* s, size_t len)
 {
-    stringtype_t* black;
-
+/*    stringtype_t* black;
+*/
     if (len < 2) {
         return TYPE_NONE;
     }
@@ -355,7 +379,7 @@ static attribute_t is_black_attr(const char* s, size_t len)
             return TYPE_BLACK;
         }
     }
-
+#if 0
     black = BLACKATTR;
     while (black->name != NULL) {
         if (cstrcasecmp_with_null(black->name, s, len) == 0) {
@@ -366,6 +390,9 @@ static attribute_t is_black_attr(const char* s, size_t len)
     }
 
     return TYPE_NONE;
+#endif
+    return lookup_blackattr(s, len);
+
 }
 
 static int is_black_url(const char* s, size_t len)
@@ -530,3 +557,69 @@ int libinjection_xss(const char* s, size_t len)
 
     return 0;
 }
+
+void libinjection_xss_destroy()
+{
+#if 0
+    if(g_blacktag_trie != NULL)
+        trie_destroy(g_blacktag_trie);
+#endif
+    if(g_blackattr_trie != NULL)
+        trie_destroy(g_blackattr_trie);
+}
+
+int libinjection_xss_init()
+{
+    void *item = NULL;
+    stringtype_t* blackattr;
+#if 0
+    const char** blacktag;
+    if(g_blacktag_trie != NULL) {
+        trie_destroy(g_blacktag_trie);
+    }
+
+    g_blacktag_trie = trie_create();
+    if(g_blacktag_trie == NULL) {
+        fprintf(stderr, "black tag trie create error.\n");
+        goto init_error;
+    }
+
+    blacktag = BLACKTAG;
+    while (*blacktag != NULL) {
+        item = trie_insert(g_blacktag_trie, *blacktag, strlen(*blacktag), blacktag);
+        if(item == NULL) {
+            fprintf(stderr, "black tag %s insert error.\n", *blacktag);
+            goto init_error;
+        }
+        printf("Got black tag %s\n", *blacktag); 
+        blacktag += 1;
+    }
+#endif
+    if(g_blackattr_trie != NULL) {
+        trie_destroy(g_blackattr_trie);
+    }
+
+    g_blackattr_trie = trie_create();
+    if(g_blackattr_trie == NULL) {
+        fprintf(stderr, "black attribute trie create error.\n");
+        goto init_error;
+    }
+
+    blackattr = BLACKATTR;
+    while(blackattr->name != NULL) {
+        item = trie_insert(g_blackattr_trie, blackattr->name, strlen(blackattr->name), blackattr);
+        if(item == NULL) {
+            fprintf(stderr, "black attribute %s insert error.\n", blackattr->name);
+            goto init_error;
+        }
+        /* printf("Got black attribute %s\n", blackattr->name); */
+        blackattr += 1;
+    }
+
+    return 0;
+
+init_error:
+    libinjection_xss_destroy();
+    return -1;
+}
+
